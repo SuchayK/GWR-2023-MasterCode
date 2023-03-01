@@ -4,10 +4,10 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPRamseteCommand;
+// import com.pathplanner.lib.PathConstraints;
+// import com.pathplanner.lib.PathPlanner;
+// import com.pathplanner.lib.PathPlannerTrajectory;
+// import com.pathplanner.lib.commands.PPRamseteCommand;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.commands.DriveWithJoystickCommand;
-import frc.robot.commands.Flush;
+// import frc.robot.commands.Flush;
 import frc.robot.commands.Intaker;
 import frc.robot.commands.Kick;
 import frc.robot.commands.Out;
@@ -88,8 +88,10 @@ public class RobotContainer {
   Trigger reverseTrigger = new JoystickButton(joystick, 7);
   Trigger outTrigger = new JoystickButton(joystick, 8);
 
-  Trigger shoot = new JoystickButton(joystick, 9); 
-  Trigger off = new JoystickButton(joystick, 10); 
+  Trigger shootLow = new JoystickButton(joystick, 9); 
+  Trigger shootMid = new JoystickButton(joystick, 10);
+  Trigger shootHigh = new JoystickButton(joystick, 11);
+  Trigger off = new JoystickButton(joystick, 12); 
 
 
   /**
@@ -113,14 +115,14 @@ public class RobotContainer {
 
   }
 
-  public Command loadPathplannerTrajectoryToRamseteCommand(String filename, boolean resetOdomtry) {
+  // public Command loadPathplannerTrajectoryToRamseteCommand(String filename, boolean resetOdomtry) {
     //Trajectory trajectory;
     //PathPlannerTrajectory examplePath;
 
     //try {
       //filename = "deploy/pathplanner/generatedJSON/New Path.wpilib.json";
       //Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(filename);
-      PathPlannerTrajectory examplePath = PathPlanner.loadPath("deploy/pathplanner/Middle.path", new PathConstraints(4, 3));
+      // PathPlannerTrajectory examplePath = PathPlanner.loadPath("deploy/pathplanner/Middle.path", new PathConstraints(4, 3));
 
       //PathPlannerState exampleState = (PathPlannerState) examplePath.sample(1.2);
       //System.out.println(trajectoryPath);
@@ -133,24 +135,24 @@ public class RobotContainer {
     // }
     // Tries to get some information from a file - J
 
-    PPRamseteCommand ramseteCommand = new PPRamseteCommand(examplePath, drivetrainSubsystem::getPose,
-        new RamseteController(DriveTrainConstants.kRamseteB, DriveTrainConstants.kRamseteZeta),
-        new SimpleMotorFeedforward(DriveTrainConstants.ksVolts, DriveTrainConstants.kvVoltSecondsPerMeter,
-            DriveTrainConstants.kaVoltSecondsSquaredPerMeter),
-        DriveTrainConstants.kDriveKinematics, drivetrainSubsystem::getWheelSpeeds,
-        new PIDController(DriveTrainConstants.kPDriveVel, 0, 0),
-        new PIDController(DriveTrainConstants.kPDriveVel, 0, 0), drivetrainSubsystem::tankDriveVolts,
-        drivetrainSubsystem);
-        // I assume something for getting the robot to go in the right direction with PID - J
+  //   PPRamseteCommand ramseteCommand = new PPRamseteCommand(examplePath, drivetrainSubsystem::getPose,
+  //       new RamseteController(DriveTrainConstants.kRamseteB, DriveTrainConstants.kRamseteZeta),
+  //       new SimpleMotorFeedforward(DriveTrainConstants.ksVolts, DriveTrainConstants.kvVoltSecondsPerMeter,
+  //           DriveTrainConstants.kaVoltSecondsSquaredPerMeter),
+  //       DriveTrainConstants.kDriveKinematics, drivetrainSubsystem::getWheelSpeeds,
+  //       new PIDController(DriveTrainConstants.kPDriveVel, 0, 0),
+  //       new PIDController(DriveTrainConstants.kPDriveVel, 0, 0), drivetrainSubsystem::tankDriveVolts,
+  //       drivetrainSubsystem);
+  //       // I assume something for getting the robot to go in the right direction with PID - J
 
-    if (resetOdomtry) {
-      return new SequentialCommandGroup(
-          new InstantCommand(() -> drivetrainSubsystem.resetOdometry(examplePath.getInitialPose())), ramseteCommand);
-    } else {
-      return ramseteCommand;
-    }
+  //   if (resetOdomtry) {
+  //     return new SequentialCommandGroup(
+  //         new InstantCommand(() -> drivetrainSubsystem.resetOdometry(examplePath.getInitialPose())), ramseteCommand);
+  //   } else {
+  //     return ramseteCommand;
+  //   }
 
-  }
+  // }
 
   /**
    * Use this method to define your button->command mappings. Buttons can be
@@ -181,7 +183,7 @@ public class RobotContainer {
     pneumaticMiddleTrigger.onTrue(Commands.parallel(new PneumaticLeftMiddle(), new PneumaticRightMiddle()));
 
     // sets every subsystem in reverse
-    flushTrigger.whileTrue(new Flush(-0.7));
+    // flushTrigger.whileTrue(new Flush(-0.7));
 
     // sets the shooter to reverse
     reverseTrigger.onTrue(new Reverse(shooter, -0.5));
@@ -189,8 +191,12 @@ public class RobotContainer {
     // reverses kicker and intake
     outTrigger.whileTrue(new Out(intake, -0.5));
 
-    shoot.onTrue(new TimeShoot(shooter, -0.45));
+    shootLow.onTrue(new TimeShoot(shooter, -0.5));
     //low score: (-.2, -2.5)
+
+    shootMid.onTrue(new TimeShoot(shooter, -0.75));
+
+    shootHigh.onTrue(new TimeShoot(shooter, -1));
     
     off.onTrue(new TimeShoot(shooter, 0));
     
